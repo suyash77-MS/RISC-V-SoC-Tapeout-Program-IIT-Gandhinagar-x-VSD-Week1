@@ -115,22 +115,300 @@ Here I’ll document lecture notes, labs, examples, code, screenshots, and refle
 # Day 1 - Introduction to Verilog RTL Design and Synthesis  
 
 ### 🔹 Introduction to Open-Source Simulator Iverilog  
-- **2-SKY130RTL D1SK1 L1** → Introduction to Iverilog: Design & Testbench  
+- **2-SKY130RTL D1SK1 L1** → Introduction to Iverilog: Design & Testbench
+  
+  🔹 Simulator
+
+Tool that mimics hardware behavior of HDL (Verilog/SystemVerilog) code.
+
+Lets you check functionality before actual hardware implementation.
+
+🔹 Design
+
+Your RTL/Verilog/SystemVerilog code (the circuit you want to build).
+
+Example: counter, ALU, FSM, etc.
+
+🔹 Testbench
+
+A verification code that stimulates the design with inputs.
+
+Checks whether outputs match expected behavior.
+
+Doesn’t synthesize → used only for simulation.
+
+🔹 How Simulator Works
+
+Compiles both design and testbench.
+
+Executes testbench inputs on design.
+
+Produces output + optional waveform data.
+
+🔹 Icarus Verilog (iverilog) Simulation Flow
+
+Write design + testbench.
+
+Compile: iverilog -o sim_out design.v testbench.v
+
+Run: vvp sim_out
+
+Generate waveform (VCD): $dumpfile("wave.vcd"); $dumpvars; inside testbench.
+
+🔹 VCD File (Value Change Dump)
+
+File format storing signal transitions over time.
+
+Generated during simulation for waveform viewing.
+
+🔹 GTKWave
+
+GUI tool to visualize VCD files.
+
+Run: gtkwave wave.vcd
+
+Lets you see signals, timing, glitches, and debug your logic.
+
+  <img width="1312" height="610" alt="image" src="https://github.com/user-attachments/assets/b1a950f0-d1d0-4978-b5aa-508c7e0a1721" />
+
 
 ### 🔹 Labs using Iverilog and GTKWave  
-- **3-SKY130RTL D1SK2 L1** → Lab1: Introduction to lab  
-- **4-SKY130RTL D1SK2 L2** → Lab2: Iverilog & GTKWave (Part 1)  
-- **5-SKY130RTL D1SK2 L3** → Lab2: Iverilog & GTKWave (Part 2)  
+- **3-SKY130RTL D1SK2 L1** → Lab1: Introduction to lab
+
+Design And Testbench Of 2:1 Multiplexer (MUX) Using Iverilog & GTKWAVE
+
+Circuit Function: A multiplexer selects one input from multiple inputs based on a control signal.
+
+Working:
+
+If sel = 0 → Output y = a
+
+If sel = 1 → Output y = b
+
+Use Case: Data selection, routing signals, implementing logic functions.
+
+Simulation: Implemented in Verilog with a testbench; simulated using Icarus Verilog (iverilog) and waveform observed in GTKWave.
+
+  <img width="1230" height="592" alt="image" src="https://github.com/user-attachments/assets/0d920834-6006-4dce-9c6f-94209eb83d9a" />
+
+- **4-SKY130RTL D1SK2 L2** → Lab2: Iverilog & GTKWave (Part 1)
+  
+  Commands Snapshot Of Implementation Of Commands To Run Mux Design
+  
+  <img width="1232" height="573" alt="image" src="https://github.com/user-attachments/assets/70d71cb7-45d0-4b9b-a57e-4b62ef7aebce" />
+
+  Output Of Mux In GTKWAVE
+
+  <img width="1257" height="365" alt="image" src="https://github.com/user-attachments/assets/a9f7ec2a-0cb6-48ff-abcd-970e8c494726" />
+
+
+- **5-SKY130RTL D1SK2 L3** → Lab2: Iverilog & GTKWave (Part 2)
+  
+  Iverilog Code and Test Bench For Mux Design
+  
+  <img width="588" height="457" alt="image" src="https://github.com/user-attachments/assets/e39e770a-8e46-4f2d-a38b-a21b57feb51d" />
+
 
 ### 🔹 Introduction to Yosys and Logic Synthesis  
-- **6-SKY130RTL D1SK3 L1** → Introduction to Yosys  
-- **7-SKY130RTL D1SK3 L2** → Logic Synthesis (Part 1)  
-- **8-SKY130RTL D1SK3 L3** → Logic Synthesis (Part 2)  
+- **6-SKY130RTL D1SK3 L1** → Introduction to Yosys
+  Yosys
+
+What it is: Open-source framework for RTL synthesis.
+
+Use: Converts Verilog RTL code into a gate-level netlist.
+
+Flow:
+
+Read design (read_verilog)
+
+Run synthesis (synth)
+
+Map to standard cells (abc, dfflibmap)
+
+Write output netlist (write_verilog)
+
+Supports: FPGA flows + ASIC flows (like SKY130).
+
+Why important: First step in RTL → GDSII design flow.
+
+  <img width="1308" height="675" alt="image" src="https://github.com/user-attachments/assets/59dc3b02-59ea-4f82-aa6a-f727f8a0998a" />
+
+🔹 Verifying Synthesis with Icarus Verilog & GTKWave
+
+Step 1: Simulate RTL design with testbench → generate wave.vcd → check logic in GTKWave.
+
+Step 2: Run synthesis in Yosys → get gate-level netlist.
+
+Step 3: Simulate the netlist with same testbench using iverilog → generate new wave.vcd.
+
+Step 4: Compare RTL waveform vs Gate-level waveform in GTKWave.
+
+If both match → synthesis is correct.
+
+  <img width="1311" height="673" alt="image" src="https://github.com/user-attachments/assets/638d40e7-7172-4a7f-8c29-47b811164cf2" />
+
+
+- **7-SKY130RTL D1SK3 L2** → Logic Synthesis (Part 1)
+
+🔹 Synthesis
+
+Definition: Process of converting RTL (Register Transfer Level) design into a gate-level representation using standard cell library.
+
+Input:
+
+Verilog RTL code
+
+Technology library (.lib)
+
+Constraints (timing, area, power)
+
+Output:
+
+Gate-level netlist (Verilog)
+
+Reports (timing, area, power)
+
+  <img width="985" height="672" alt="image" src="https://github.com/user-attachments/assets/d35a28e1-e94c-4a0d-a4d7-d8b8f2c00c7b" />
+
+  🔹 What is .lib?
+
+A timing library file used in synthesis.
+
+Describes each standard cell:
+
+Function (logic equation)
+
+Timing (delay, setup, hold)
+
+Power consumption
+
+Area
+
+Input to synthesis → helps tool map RTL to real gates.
+
+Why Different Flavours of Gates?
+
+Same logic gate (e.g., NAND2) can have different drive strengths/sizes (like NAND2_X1, NAND2_X2, NAND2_X4).
+
+Reason:
+
+Faster cells → handle high load but consume more area/power.
+
+Slower cells → smaller area, less power, but higher delay.
+
+Synthesis tool chooses based on timing + power constraints.
+
+
+<img width="985" height="638" alt="image" src="https://github.com/user-attachments/assets/cd6c3d71-4b54-4a07-9f51-d62a3ed2d5a8" />
+
+ Why We Need Slower Cells?
+
+Hold Violation: Happens when data travels too fast and reaches the next flip-flop before the hold time is satisfied.
+
+Fix: Add delay in the path → one way is to use slower cells instead of fast cells.
+
+Result: Slower cells increase path delay, preventing data from arriving too early → hold violation removed.
+
+- **8-SKY130RTL D1SK3 L3** → Logic Synthesis (Part 2)
+
+🔹 Fast Cells vs Slow Cells
+
+| Feature               | Fast Cell                             | Slow Cell                                  |
+| --------------------- | ------------------------------------- | -------------------------------------------- |
+| **Delay**             | Low (quick switching)                 | High (slower switching)                      |
+| **Power Consumption** | High (more dynamic power)             | Low (less power)                             |
+| **Area**              | Large (bigger transistors)            | Small (smaller transistors)                  |
+| **Use Case**          | Critical paths (timing-sensitive)     | Non-critical paths (hold/power optimization) |
+| **Hold/Setup Effect** | May cause hold violations if too fast | Helps fix hold violations by adding delay    |
+
 
 ### 🔹 Labs using Yosys and Sky130 PDKs  
-- **9-SKY130RTL D1SK4 L1** → Lab3: Yosys Good Mux (Part 1)  
-- **10-SKY130RTL D1SK4 L2** → Lab3: Yosys Good Mux (Part 2)  
-- **11-SKY130RTL D1SK4 L3** → Lab3: Yosys Good Mux (Part 3)  
+- **9-SKY130RTL D1SK4 L1** → Lab3: Yosys Good Mux (Part 1)
+
+# 1. Start Yosys
+yosys
+
+# 2. Read your Verilog design
+read_verilog design.v
+
+# 3. Run generic synthesis
+synth
+
+# 4. Map to a standard cell library (example: SKY130)
+dfflibmap -liberty sky130_fd_sc_hd__tt_025C_1v80.lib
+abc -liberty sky130_fd_sc_hd__tt_025C_1v80.lib
+
+# 5. Check design
+stat
+
+# 6. Write gate-level netlist
+write_verilog gatelevel.v
+
+# 7. (Optional) Visualize netlist
+show gatelevel.v
+
+  Snap Shot Of Commands To invoke Yosys
+  
+  <img width="1256" height="546" alt="image" src="https://github.com/user-attachments/assets/2e56b5c6-aef4-44f5-9ed6-4b72d269eacb" />
+
+  
+- **10-SKY130RTL D1SK4 L2** → Lab3: Yosys Good Mux (Part 2)
+
+<img width="1190" height="363" alt="image" src="https://github.com/user-attachments/assets/96ebefb2-4a4f-403c-8368-8cadf6d9138a" />
+
+  This is a gate-level netlist view from Yosys showing technology mapping. Here’s a short explanation of the mapping shown in your image:
+
+Inputs & Buffers
+
+i0, i1, and sel are inputs.
+
+Each input goes through a BUF (buffer) which strengthens the signal for further gates.
+
+Mapped Standard Cells
+
+$53 → sky130_fd_sc_hd__clkinv_1 : This is an inverter applied on i0.
+
+$54 → sky130_fd_sc_hd__nand2_1 : This is a 2-input NAND gate applied on i1 and sel.
+
+AOI Gate (Complex Mapping)
+
+$55 → sky130_fd_sc_hd__o21ai_0 : Yosys has mapped the combination of inverter and NAND into a complex gate (OR-AND-Invert) to optimize area/delay.
+
+Inputs A1, A2, B1 are connected from previous cells.
+
+Output Buffer
+
+The final output y goes through a BUF for clean output drive.
+
+✅ Summary:
+
+Yosys converts RTL (like assign y = sel ? i1 : i0) into standard cells.
+
+Simple logic (i0 inverter, i1 NAND) is mapped to basic cells.
+
+Logic combination is optimized into complex cells (o21ai) to reduce area/delay.
+
+Buffers are added for proper driving of signals.
+
+- **11-SKY130RTL D1SK4 L3** → Lab3: Yosys Good Mux (Part 3)
+  
+This file is a gate‑level Verilog netlist written by a synthesis tool after mapping RTL to real SKY130 standard cells.
+
+The top comment records the synthesis tool/version; the module line shows the block name and its ports (inputs like i0, i1, sel and outputs like y).
+
+Internal wire declarations create nets that connect the pins of instantiated cells inside the design.
+
+Instances such as clkinv (inverter), nand2 (2‑input NAND), and o21ai (Y = NAND(OR(A1,A2), B1)) implement the logic using SKY130 HD cells.
+
+Pin maps like .A(sig) or .A1(sig) connect signals to each cell’s pins; each instance drives or consumes the declared wires.
+
+Final assign statements hook the module’s outputs to the appropriate internal nets driven by those cell instances.
+
+Functionally, this particular mix realizes a 2:1 mux structure, so tracing from inputs through these gates to the outputs reveals the mux behaviour
+
+
+  <img width="901" height="503" alt="image" src="https://github.com/user-attachments/assets/3f888ce5-f776-40e9-8601-6cf03e741823" />
+
 
 ---
 
