@@ -325,26 +325,26 @@ Result: Slower cells increase path delay, preventing data from arriving too earl
 ### 🔹 Labs using Yosys and Sky130 PDKs  
 - **9-SKY130RTL D1SK4 L1** → Lab3: Yosys Good Mux (Part 1)
 
-# 1. Start Yosys
+ 1. Start Yosys
 yosys
 
-# 2. Read your Verilog design
+2. Read your Verilog design
 read_verilog design.v
 
-# 3. Run generic synthesis
+3. Run generic synthesis
 synth
 
-# 4. Map to a standard cell library (example: SKY130)
+4. Map to a standard cell library (example: SKY130)
 dfflibmap -liberty sky130_fd_sc_hd__tt_025C_1v80.lib
 abc -liberty sky130_fd_sc_hd__tt_025C_1v80.lib
 
-# 5. Check design
+ 5. Check design
 stat
 
-# 6. Write gate-level netlist
+ 6. Write gate-level netlist
 write_verilog gatelevel.v
 
-# 7. (Optional) Visualize netlist
+7. Visualize netlist
 show gatelevel.v
 
   Snap Shot Of Commands To invoke Yosys
