@@ -1478,25 +1478,257 @@ Verilog code to understand second issue due to not giving all conditions or cave
 So below screenshot shows that we are not getting proper output on gtkwave for above design becasue we have not mentioned all the conditions of if else
 
 <img width="1095" height="220" alt="image" src="https://github.com/user-attachments/assets/f4e6aac6-3382-4927-9f81-a0512043c675" />
+
 So the following figuare shows netlist for second design.It shows that we get latch in place of muxes becasue of we have not mentioned else conditions for if 
+
 <img width="1230" height="350" alt="image" src="https://github.com/user-attachments/assets/0f90fca8-94ea-4c05-9545-799255f8ee0f" />
 
 ### 🔹 Labs on Incomplete Overlapping Case  
-- **46-SKY130RTL D5SK3 L1** → Lab: Incomplete Overlapping Case (Part 1)  
-- **47-SKY130RTL D5SK3 L2** → Lab: Incomplete Overlapping Case (Part 2)  
-- **48-SKY130RTL D5SK3 L3** → Lab: Incomplete Overlapping Case (Part 3)  
-- **49-SKY130RTL D5SK3 L4** → Lab: Incomplete Overlapping Case (Part 4)  
+- **46-SKY130RTL D5SK3 L1** → Lab: Incomplete Overlapping Case (Part 1)
+Verilog code for case construct on Icarus Verilog
+
+<img width="508" height="125" alt="image" src="https://github.com/user-attachments/assets/35e1c7e1-234e-458d-af09-de8ecf4e0fc1" />
+
+Functional simulation for case construct on gtkwave it shows that if we not give all conditions in case then we will not get proper output or output is latched.In the above figuare we can clearly see that we are getting proper output for i0 and i1 but in case of i2 and i3 ouput is not getting  properly it is only becasue we have not mentioned what do for these in case statement written in verilog
+code
+
+<img width="1090" height="117" alt="image" src="https://github.com/user-attachments/assets/0f31461a-017e-4b05-bc85-8603088586b8" />
+
+The above figuare shows the gate level netlist for case construct 
+
+<img width="1262" height="315" alt="image" src="https://github.com/user-attachments/assets/6ee0b2aa-d8d9-4e73-a56e-e76917491a50" />
+
+
+- **47-SKY130RTL D5SK3 L2** → Lab: Incomplete Overlapping Case (Part 2)
+  
+It is the verilog to handle case construct using default statement to avoid improper working of circuit it will help to make proper wworking of circuit
+ 
+<img width="502" height="148" alt="image" src="https://github.com/user-attachments/assets/96a258c4-246e-43a3-8cc2-61aff31aead6" />
+
+Following is Simulation  of case construct handling using default statement on gtkwave  to maintain proper working of circuit. 
+
+<img width="1090" height="172" alt="image" src="https://github.com/user-attachments/assets/a9407c29-8a0d-4662-b2f3-ecc5c1ea2d58" />
+
+The following is gatelevel netlist of above design it clearly shows that if we use default condition it infer will not infer latch so it is importent to use default to maintain proper output for
+unused states otherwise there might be possibility of lock out due to it
+
+<img width="1267" height="460" alt="image" src="https://github.com/user-attachments/assets/8efd9480-4d11-4ed4-b324-4dfb543a40bd" />
+
+- **48-SKY130RTL D5SK3 L3** → Lab: Incomplete Overlapping Case (Part 3)
+- 
+The below image shows the code verilog code to understand partial dependency issues in case construct
+
+<img width="670" height="197" alt="image" src="https://github.com/user-attachments/assets/4edbde34-24bf-4ef1-a902-2cbd178bf128" />
+
+The Figuare below shows the gate level netlist for above verilog code
+
+<img width="1257" height="508" alt="image" src="https://github.com/user-attachments/assets/21f17d55-7d0c-414a-a8d7-1a864d101c76" />
+
+
+
+- **49-SKY130RTL D5SK3 L4** → Lab: Incomplete Overlapping Case (Part 4)
+
+The verilog code for case construct if we mention  same conditions.Ex  like sel =00 twice or we use sel=1? so synthesizer will get confused what to use chose and it will affect the out pur it is called bad case construct so we need avoid repetition of sel inputs to generate desired output
+
+<img width="657" height="207" alt="image" src="https://github.com/user-attachments/assets/98933284-1635-4930-9934-a00bbf6c1faf" />
+
+Snapshots of commands to do synthesis of case construct for bad case construct
+
+<img width="962" height="517" alt="image" src="https://github.com/user-attachments/assets/93b4e618-8c64-4034-a65e-b6a080f7864f" />
+
 
 ### 🔹 For Loop and For Generate  
-- **50-SKY130RTL D5SK4 L1** → For Loop & For Generate (Part 1)  
-- **51-SKY130RTL D5SK4 L2** → For Loop & For Generate (Part 2)  
-- **52-SKY130RTL D5SK4 L3** → For Loop & For Generate (Part 3)  
+- **50-SKY130RTL D5SK4 L1** → For Loop & For Generate (Part 1)
+  
+for Loop in Procedural Blocks (always, initial)
 
+Used for simulation/behavioral modeling.
+
+Executes sequentially during simulation.
+
+Example:
+
+always @(posedge clk) begin
+    for (i=0; i<8; i=i+1)
+        shift_reg[i] <= shift_reg[i-1];
+end
+
+
+Applications:
+
+Repeated assignments inside always block
+
+Testbench stimulus
+
+Compact behavioral code
+
+Hardware is not replicated — just sequential description.
+
+🔹 generate for Loop
+
+Used in RTL synthesis to replicate hardware.
+
+Works at elaboration/compile-time, not at run-time.
+
+Example:
+
+genvar i;
+generate 
+  for (i=0; i<8; i=i+1) begin : gen_block
+      dff d1 (.d(d[i]), .clk(clk), .q(q[i]));
+  end
+endgenerate
+
+
+Applications:
+
+Instantiating multiple modules (e.g., N flip-flops, adders)
+
+Parametric hardware design (scalable design)
+
+Creates real hardware copies, unlike procedural for.
+
+Aspect	Procedural for (always/initial)	Generate for
+Execution Time	Run-time (simulation)	Compile/elaboration time
+Purpose	Compact coding in behavior	Replicate hardware structurally
+Use Case	Loops inside processes, testbenches	Multiple module instances, parametric RTL
+
+| Aspect         | Procedural `for` (`always/initial`) | Generate `for`                            |
+| -------------- | ----------------------------------- | ----------------------------------------- |
+| Execution Time | Run-time (simulation)               | Compile/elaboration time                  |
+| Purpose        | Compact coding in behavior          | Replicate hardware structurally           |
+| Use Case       | Loops inside processes, testbenches | Multiple module instances, parametric RTL |
+
+
+- **51-SKY130RTL D5SK4 L2** → For Loop & For Generate (Part 2)
+  
+🔹 Proper Uses of generate for
+
+Replicating Modules/Hardware
+
+Example: Creating an N-bit register by instantiating multiple D-FFs.
+
+genvar i;
+generate 
+  for (i=0; i<N; i=i+1) begin : reg_array
+    dff d1 (.d(d[i]), .clk(clk), .q(q[i]));
+  end
+endgenerate
+
+
+Bus/Array of Adders, Multipliers, Comparators
+
+Example: Ripple-carry adder → chain of 1-bit full adders.
+
+genvar j;
+generate 
+  for (j=0; j<N; j=j+1) begin : adder_chain
+    full_adder fa (.a(a[j]), .b(b[j]), .cin(c[j]), .s(sum[j]), .cout(c[j+1]));
+  end
+endgenerate
+
+
+Parameterized & Scalable Designs
+
+Change N parameter → hardware scales automatically.
+
+Used in IP blocks like ALUs, multipliers, memories.
+
+Conditional Hardware Generation
+
+With if-generate inside → include/exclude hardware based on parameters.
+
+generate 
+  if (WIDTH == 8) begin 
+     // 8-bit version hardware
+  end else begin 
+     // 16-bit version hardware
+  end
+endgenerate
+
+- **52-SKY130RTL D5SK4 L3** → For Loop & For Generate (Part 3)
+  
+Normal for (inside always / initial)
+
+Runs at simulation time.
+
+Used for iterative assignments/operations.
+
+Does not replicate hardware → just a compact way to describe behavior.
+
+Example: shift register update inside an always block.
+
+🔹 Generate for (outside always, with genvar)
+
+Runs at elaboration/compile time.
+
+Used to replicate hardware modules/blocks.
+
+Creates real hardware instances (N copies).
+
+Example: generate N flip-flops, adders, multiplexers.
 ### 🔹 Labs on For Loop and For Generate  
-- **53-SKY130RTL D5SK5 L1** → Lab: For & For Generate (Part 1)  
-- **54-SKY130RTL D5SK5 L2** → Lab: For & For Generate (Part 2)  
-- **55-SKY130RTL D5SK5 L3** → Lab: For & For Generate (Part 3)  
-- **56-SKY130RTL D5SK5 L4** → Lab: For & For Generate (Part 4)  
+- **53-SKY130RTL D5SK5 L1** → Lab: For & For Generate (Part 1)
+
+The following is the verilog code to understand use case of for loop inside always block it it works
+
+<img width="686" height="136" alt="image" src="https://github.com/user-attachments/assets/f8b382a4-0066-442e-88a7-dc040fa7ed62" />
+
+The below diagram shows the output verilog code for loop inside always block in gtkwave.
+
+<img width="1076" height="268" alt="image" src="https://github.com/user-attachments/assets/08e17dd7-e379-47f8-91c0-8f80e6fcb637" />
+
+
+
+- **54-SKY130RTL D5SK5 L2** → Lab: For & For Generate (Part 2)
+  
+🔹 Why for is preferred over case 
+
+Scalability → for easily handles large bit-widths (e.g., 128-bit bus), while case becomes too long.
+
+Parameterization → works smoothly with parameters/generics for flexible designs.
+
+Compact Code → avoids repetitive code that case would require.
+
+Less Error-Prone → no risk of missing cases (which can infer latches).
+
+Synthesis Friendly → tools unroll for into equivalent hardware automatically.
+
+Verilog code for demux using case
+
+<img width="825" height="240" alt="image" src="https://github.com/user-attachments/assets/5947b47e-a392-4d76-a166-2c4da8b14da6" />
+
+Verilog code for demux using for loop it is prefered over case for large demux like 1:256 mux and larger than these also
+
+<img width="922" height="167" alt="image" src="https://github.com/user-attachments/assets/f5abf477-0089-420b-a37d-2f70a5100fcb" />
+
+Output of demux on gtkwace using case statement
+
+<img width="1092" height="226" alt="image" src="https://github.com/user-attachments/assets/dd4b87d6-574a-4b5c-89d9-b2b663bae0ab" />
+
+
+- **55-SKY130RTL D5SK5 L3** → Lab: For & For Generate (Part 3)
+  
+🔹 Why prefer for-generate over manual structural instantiation
+
+Scalability → avoids writing hundreds of repetitive module instances manually.
+
+Parameterization → design size changes automatically with a parameter (N).
+
+Readability & Maintainability → much cleaner and less error-prone code.
+
+Consistency → guarantees identical hardware replication without copy-paste mistakes.
+
+The following is the code for ripple carry adder using for generate it is very useful in case large design help us to reduce the thousands line of code
+
+<img width="682" height="227" alt="image" src="https://github.com/user-attachments/assets/8ba3ba49-7760-4662-8291-cca025dd6df4" />
+
+
+- **56-SKY130RTL D5SK5 L4** → Lab: For & For Generate (Part 4)
+  
+It shows the output of full adder implemented using for generate on gtkwave
+
+<img width="580" height="121" alt="image" src="https://github.com/user-attachments/assets/3161adcd-9bff-4f79-8b7d-b09bf0f04f5b" />
 
 ---
 
