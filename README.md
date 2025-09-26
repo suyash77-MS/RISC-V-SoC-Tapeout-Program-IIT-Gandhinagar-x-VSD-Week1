@@ -745,22 +745,260 @@ We can clearly see in netlist which is shown below there is no complex hardware 
 # Day 3 - Combinational and Sequential Optimizations  
 
 ### 🔹 Introduction to Optimizations  
-- **23-SKY130RTL D3SK1 L1** → Optimizations (Part 1)  
-- **24-SKY130RTL D3SK1 L2** → Optimizations (Part 2)  
-- **25-SKY130RTL D3SK1 L3** → Optimizations (Part 3)  
+- **23-SKY130RTL D3SK1 L1** → Optimizations (Part 1)
+ Combinational Logic Optimization
+
+Definition:
+Simplifying a digital circuit to reduce the number of gates, levels, or inputs without changing its functionality.
+
+Purpose:
+
+Reduce chip area
+
+Increase speed (lower propagation delay)
+
+Reduce power consumption
+
+Make design cost-effective
+
+Techniques:
+
+Boolean algebra simplification
+
+Karnaugh Map (K-map)
+
+Quine–McCluskey method
+
+Example 1: Multiplication by 2
+
+Original: Use a multiplier to compute Y = A × 2
+
+Optimized: Use a left shift operation: Y = A << 1 (no multiplier needed)
+
+Example 2: Logic simplification
+
+Original: F = A·B + A·~B
+
+Constant Propagation
+
+Definition:
+Constant propagation is a technique where constant values (0 or 1) in a circuit are used to simplify logic expressions, eliminating unnecessary gates.
+
+Why it is used:
+
+Reduces the number of gates
+
+Simplifies the circuit
+
+Improves speed and power efficiency
+
+Example:
+
+Original logic:
+
+F = A·1 + B·0
+
+
+Step-by-step simplification using constant propagation:
+
+A·1 = A (anything AND 1 is itself)
+
+B·0 = 0 (anything AND 0 is 0)
+
+So, the optimized logic:
+
+F = A + 0
+F = A
+
+
+Key idea: The constants (1 and 0) “propagate” through the logic and simplify the circuit.
+
+Optimized: F = A
+
+- **24-SKY130RTL D3SK1 L2** → Optimizations (Part 2)
+
+  Sequential Logic Optimization
+
+Definition:
+Sequential logic optimization improves circuits that have memory elements (flip-flops, latches) along with combinational logic, aiming to reduce area, increase speed, or lower power without changing functionality.
+
+Why it is used:
+
+Reduce critical path delay → faster circuits
+
+Minimize number of flip-flops and gates → smaller area
+
+Optimize power consumption
+
+Improve timing and throughput
+
+
+
+Definition:
+In sequential circuits, constant optimization uses known constant inputs or states to simplify flip-flops and combinational logic that depends on them.
+
+Example:
+
+Suppose we have a sequential circuit with:
+
+DFF1: Q1 = D1
+D1 = A · 1
+
+
+Here, 1 is a constant.
+
+Optimization: D1 = A · 1 = A
+
+Flip-flop still stores Q1 = A, but the AND gate is removed.
+
+Another example (state-based):
+
+State machine table:
+
+Current State	Input	Next State
+S0	0	S0
+S0	1	S1
+
+If we know input is always 1 during a certain operation, we can propagate this constant:
+
+Remove transitions that depend on 0
+
+Simplify logic for next state computation
+
+Key Idea:
+
+Constants propagate through combinational logic between flip-flops.
+
+Eliminates unnecessary gates and sometimes reduces flip-flop usage.
+
+- **25-SKY130RTL D3SK1 L3** → Optimizations (Part 3)
+
+  Advanced Techniques
+
+Retiming
+
+What: Moving flip-flops across combinational logic to balance path delays.
+
+Why: Reduces the critical path and increases maximum clock frequency.
+
+Example:
+
+Before Retiming: FF -> combinational logic -> FF
+After Retiming: combinational logic -> FF -> combinational logic
+
+
+This can allow the circuit to run at a higher clock without changing behavior.
+
+Cloning (or Register Cloning)
+
+What: Duplicating combinational logic blocks so multiple registers can share computations.
+
+Why: Reduces fan-out and load on critical paths, improving timing.
+
+Example:
+
+One logic block feeds 4 FFs → clone the logic so each FF gets its own block → faster clock
+
+
+Other common sequential optimizations
+
+Clock gating: Turn off flip-flops that are not needed to save power
+
+State encoding optimization: Reduce flip-flop count by smart encoding of states
+
+Pipeline balancing: Evenly distribute logic between stages to improve throughput
+
+Sequential Constant Optimization
 
 ### 🔹 Combinational Logic Optimizations  
-- **26-SKY130RTL D3SK2 L1** → Lab6: Combinational Logic (Part 1)  
+- **26-SKY130RTL D3SK2 L1** → Lab6: Combinational Logic (Part 1)
+  Snapshot of Verilog code for and gate using mux
+  
+  <img width="337" height="62" alt="image" src="https://github.com/user-attachments/assets/c67e0d5f-469e-4052-8542-153585b13581" />
+  
+ Snapshot of Verilog code for or gate using mux
+  <img width="298" height="61" alt="image" src="https://github.com/user-attachments/assets/0c23bb02-a970-403e-bf3b-0f7ce9308159" />
+Commands window Snapshot of  synthesis of & and or gate using mux
+
+<img width="883" height="328" alt="image" src="https://github.com/user-attachments/assets/29ecc0e1-db56-41c2-ad9b-5b3d1b7b6fca" />
+
+Gate level netlist of and gate using mux
+
+<img width="352" height="227" alt="image" src="https://github.com/user-attachments/assets/3250ce44-d5f1-400f-bfff-a95e1816cf6e" />
+
+
 - **27-SKY130RTL D3SK2 L2** → Lab6: Combinational Logic (Part 2)  
+Gate level netlist for or gate using mux
+
+<img width="673" height="200" alt="image" src="https://github.com/user-attachments/assets/7a288056-1f91-42d9-94fa-6f5f0481592e" />
+ 
+ Verilod code for 3 input and gat using mux
+ 
+<img width="368" height="67" alt="image" src="https://github.com/user-attachments/assets/72089e39-b930-48be-982b-0b1d7772be96" />
+
+Gatelevel netlist for 3 input and gate usign mux
+
+<img width="352" height="200" alt="image" src="https://github.com/user-attachments/assets/5937a937-9300-4fd0-a75a-951215bbcf49" />
+
 
 ### 🔹 Sequential Logic Optimizations  
-- **28-SKY130RTL D3SK3 L1** → Lab7: Sequential Logic (Part 1)  
-- **29-SKY130RTL D3SK3 L2** → Lab7: Sequential Logic (Part 2)  
-- **30-SKY130RTL D3SK3 L3** → Lab7: Sequential Logic (Part 3)  
+- **28-SKY130RTL D3SK3 L1** → Lab7: Sequential Logic (Part 1)
+  Verilog code for dff to understand the sequential logic optimizations
+  
+  <img width="365" height="167" alt="image" src="https://github.com/user-attachments/assets/818449c0-9ab8-4599-878d-3911e15bd51b" />
+  
+ Commands to run waveform on gtkwave for dff 
+
+<img width="1237" height="386" alt="image" src="https://github.com/user-attachments/assets/ee994722-5455-4daa-ab27-369b9329b2bf" />
+
+Snapshot of improper output of dff on gtkwave
+
+<img width="1081" height="172" alt="image" src="https://github.com/user-attachments/assets/3acc3852-0caa-4991-a21b-2c2462931d4d" />
+
+Gate level netlist for dff using synthesis on yosys
+
+<img width="1262" height="356" alt="image" src="https://github.com/user-attachments/assets/9dc65fde-906c-4389-a611-7a510369c406" />
+
+
+- **29-SKY130RTL D3SK3 L2** → Lab7: Sequential Logic (Part 2)
+  Gate level netlist for design secod case output is optimized becasue be rremoved flip flops from netlist using logic so it is sequential optimization
+  
+  <img width="366" height="301" alt="image" src="https://github.com/user-attachments/assets/08dcbd18-2ba2-480e-8a0e-dc556b55d4d5" />
+
+- **30-SKY130RTL D3SK3 L3** → Lab7: Sequential Logic (Part 3)
+  Verilog code to understand thrid logic optimizations
+  
+<img width="461" height="262" alt="image" src="https://github.com/user-attachments/assets/00e46f74-764d-41bb-a7c0-217fdd3ecaa6" />
 
 ### 🔹 Sequential Optimizations for Unused Outputs  
-- **31-SKY130RTL D3SK4 L1** → Seq Optimisation unused outputs (Part 1)  
-- **32-SKY130RTL D3SK4 L2** → Seq Optimisation unused outputs (Part 2)  
+- **31-SKY130RTL D3SK4 L1** → Seq Optimisation unused outputs (Part 1)  '
+Snapshot of command window for observing output of above that thrid design
+  <img width="961" height="111" alt="image" src="https://github.com/user-attachments/assets/a40486b6-ead4-475e-9923-e34a6042ab5e" />
+  
+Snapshot Output of gtkwave for above design
+
+<img width="1090" height="151" alt="image" src="https://github.com/user-attachments/assets/02734d29-ab88-483e-9750-87b0359387e7" />
+
+Snapshot of command window to do synthesis of above design
+
+<img width="877" height="272" alt="image" src="https://github.com/user-attachments/assets/e505f868-b73a-45db-81bd-0b25e0f3f324" />
+
+Gate level netlist for above design
+
+<img width="1256" height="458" alt="image" src="https://github.com/user-attachments/assets/13d90983-1ddc-4676-bb99-a579c459b714" />
+
+- **32-SKY130RTL D3SK4 L2** → Seq Optimisation unused outputs (Part 2)
+  
+Verilog code for counter is shown in these snapshot
+<img width="486" height="197" alt="image" src="https://github.com/user-attachments/assets/dca530d7-9f96-43fd-b03e-f6411ccc31c6" />
+
+Snapshot of commands used ton  synthesis of conter.These design shows how hardware can be optimized there are unoptimized states in design
+
+<img width="498" height="502" alt="image" src="https://github.com/user-attachments/assets/53daa04f-b7b7-408a-a4c5-658c50ddcaae" />
+
+The below figuare shows gatelevel netlist for counter and for 3 bit counter we usually rquire 3 flipflop but they are some unused state in design then we can do it using  one flop also which exactly these lab provided to show
+
+<img width="1262" height="423" alt="image" src="https://github.com/user-attachments/assets/f6c16d30-f19d-43bb-a2c4-baa14b4407cf" />
 
 ---
 
