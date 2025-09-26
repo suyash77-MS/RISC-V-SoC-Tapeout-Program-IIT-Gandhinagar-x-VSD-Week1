@@ -1448,8 +1448,38 @@ Hard Debugging → design seems fine in sim but fails in GLS/FPGA.
 
 ### 🔹 Labs on Incomplete If-Case  
 - **44-SKY130RTL D5SK2 L1** → Lab: Incomplete IF (Part 1)
+- 
+Verilog code to understand errors can occur if not give all conditions to if else
+
+<img width="402" height="107" alt="image" src="https://github.com/user-attachments/assets/0cb43b1b-c14a-4d86-a771-1187e0b15b20" />
   
-- **45-SKY130RTL D5SK2 L2** → Lab: Incomplete IF (Part 2)  
+Diagram below shows that circuit is not working proper because we have just give condition when io is high but not mentioned what to do if io is low so due to these we get simulation mismatch is
+which shown on output of gtkwave for above design 
+
+<img width="1075" height="212" alt="image" src="https://github.com/user-attachments/assets/ec00f925-9c67-4362-bebb-5321eb95794e" />
+
+Commands snapshot To run synthesis of above design on yosys tool.
+
+<img width="596" height="531" alt="image" src="https://github.com/user-attachments/assets/8563503b-e120-498f-ac81-c1d59e8bb44c" />
+
+These the gatelevel netlist for incomplete if due to not giving all conditions we got d flipflop is infered in place of mux these due to if else cavets
+
+<img width="347" height="367" alt="image" src="https://github.com/user-attachments/assets/06178798-7b9f-4d80-b85d-b05a86bcd212" />
+
+
+
+  
+- **45-SKY130RTL D5SK2 L2** → Lab: Incomplete IF (Part 2)
+  
+Verilog code to understand second issue due to not giving all conditions or cavets due to if eles construct
+
+<img width="528" height="147" alt="image" src="https://github.com/user-attachments/assets/154c9760-fa69-4e75-9c63-23fd9f0b757d" />
+
+So below screenshot shows that we are not getting proper output on gtkwave for above design becasue we have not mentioned all the conditions of if else
+
+<img width="1095" height="220" alt="image" src="https://github.com/user-attachments/assets/f4e6aac6-3382-4927-9f81-a0512043c675" />
+So the following figuare shows netlist for second design.It shows that we get latch in place of muxes becasue of we have not mentioned else conditions for if 
+<img width="1230" height="350" alt="image" src="https://github.com/user-attachments/assets/0f90fca8-94ea-4c05-9545-799255f8ee0f" />
 
 ### 🔹 Labs on Incomplete Overlapping Case  
 - **46-SKY130RTL D5SK3 L1** → Lab: Incomplete Overlapping Case (Part 1)  
