@@ -1,5 +1,8 @@
 🏆 #IIT Gandhinagar – VSD RISC-V SoC Tapeout Program
 
+<img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/799c16ad-9e69-4c35-8e1e-2be1aaeaadb3" />
+
+
 🚀 Overview
 
 A silicon-proven, open-source SoC design journey where I learned the complete RTL-to-GDS flow on Sky130 PDK, starting from Verilog RTL, simulation, synthesis, optimizations, GLS, and tapeout methodologies.
