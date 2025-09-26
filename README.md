@@ -912,12 +912,14 @@ Sequential Constant Optimization
 
 ### 🔹 Combinational Logic Optimizations  
 - **26-SKY130RTL D3SK2 L1** → Lab6: Combinational Logic (Part 1)
-  Snapshot of Verilog code for and gate using mux
+Snapshot of Verilog code for and gate using mux
+
+<img width="337" height="62" alt="image" src="https://github.com/user-attachments/assets/c67e0d5f-469e-4052-8542-153585b13581" />
   
-  <img width="337" height="62" alt="image" src="https://github.com/user-attachments/assets/c67e0d5f-469e-4052-8542-153585b13581" />
-  
- Snapshot of Verilog code for or gate using mux
-  <img width="298" height="61" alt="image" src="https://github.com/user-attachments/assets/0c23bb02-a970-403e-bf3b-0f7ce9308159" />
+Snapshot of Verilog code for or gate using mux
+ 
+<img width="298" height="61" alt="image" src="https://github.com/user-attachments/assets/0c23bb02-a970-403e-bf3b-0f7ce9308159" />
+ 
 Commands window Snapshot of  synthesis of & and or gate using mux
 
 <img width="883" height="328" alt="image" src="https://github.com/user-attachments/assets/29ecc0e1-db56-41c2-ad9b-5b3d1b7b6fca" />
@@ -1005,18 +1007,255 @@ The below figuare shows gatelevel netlist for counter and for 3 bit counter we u
 # Day 4 - GLS, Blocking vs Non-blocking and Synthesis-Simulation Mismatch  
 
 ### 🔹 GLS, Synthesis-Simulation Mismatch and Blocking/Non-blocking Statements  
-- **33-SKY130RTL D4SK1 L1** → GLS Concepts & Flow using Iverilog  
-- **34-SKY130RTL D4SK1 L2** → Synthesis-Simulation Mismatch  
-- **35-SKY130RTL D4SK1 L3** → Blocking vs Non-Blocking Statements in Verilog  
-- **36-SKY130RTL D4SK1 L4** → Caveats with Blocking Statements  
+- **33-SKY130RTL D4SK1 L1** → GLS Concepts & Flow using Iverilog
+  
+Gate Level Simulation (GLS)
+
+Definition: GLS is simulation of the synthesized gate-level netlist instead of the RTL code.
+
+After synthesis, your design is represented using logic gates (AND, OR, FFs, MUX, etc.) from the technology library.
+
+GLS uses these gate models + optional timing info to verify correctness at the gate level.
+
+🔹 Why GLS is needed?
+
+Equivalence Check: Ensure synthesized netlist behaves the same as RTL.
+
+Timing Verification: With SDF (delays), ensures design meets setup/hold timing.
+
+X-Propagation Checks: Detect uninitialized registers, reset issues, glitches.
+
+Library Mapping: Verify actual cells (from .lib) are functioning as expected.
+
+Confidence before Layout: Ensures no mismatch before place-and-route.
+
+GLS using Icarus Verilog
+
+<img width="1227" height="547" alt="image" src="https://github.com/user-attachments/assets/e95a2986-18f1-4640-8f8c-3f8f9d0e1972" />
+
+- **34-SKY130RTL D4SK1 L2** → Synthesis-Simulation Mismatch
+  
+🔹 Simulation Mismatches
+
+A simulation mismatch occurs when the RTL simulation result ≠ GLS simulation result.
+
+👉 This usually means the RTL code was written in a way that did not model real hardware correctly, so synthesis interpreted it differently.
+
+Common causes:
+
+Missing sensitivity list (biggest reason in Verilog).
+
+Blocking (=) vs Non-blocking (<=) misuse in sequential logic.
+
+Latch inference due to incomplete assignments.
+
+Uninitialized signals – GLS may show X where RTL showed 0.
+
+Timing differences (RTL ignores delays, GLS includes gate delays).
+
+🔹 Missing Sensitivity Problem
+
+Example (wrong code):
+always @(a) begin   // Missing 'b' in sensitivity list
+  y = a & b;
+end
+
+
+In RTL simulation:
+y will update only when a changes. If b changes alone → no update, so simulation output is stale.
+
+In Synthesis (GLS):
+Tool infers a combinational gate AND(a, b), so y changes whenever a or b changes.
+
+👉 Result = RTL vs GLS mismatch.
+
+Correct code (fix):
+always @(*) begin    // or always @(a or b)
+  y = a & b;
+end
+
+
+@(*) automatically adds all signals in RHS (a, b) → consistent with synthesized hardware.
+
+Now both RTL and GLS match.
+
+🔹 Why this is dangerous?
+
+During RTL sim, you might think design is fine (no bugs).
+
+But after synthesis → GLS shows mismatch (functional failure).
+
+This is why coding guidelines recommend using always @(*) for combinational logic and always @(posedge clk or negedge rst) for sequential logic.
+- **35-SKY130RTL D4SK1 L3** → Blocking vs Non-Blocking Statements in Verilog
+  🔹 Simulation Mismatches in Blocking vs Non-Blocking Assignments
+1. Blocking (=)
+
+Executes immediately in the given order inside always.
+
+Acts like software statements.
+
+Can cause unintended behavior in RTL sim if used in sequential always blocks.
+
+👉 Example of mismatch
+
+// Sequential block with blocking assignment
+always @(posedge clk) begin
+  q = d;
+  r = q;   // Uses the updated q immediately (in RTL sim)
+end
+
+
+RTL Simulation:
+r gets the new value of d in the same clock cycle (because q updated immediately).
+
+Synthesis/GLS:
+Hardware is two flip-flops in series (q → r). r should get the old value of q.
+→ Mismatch!
+
+✅ Correct way: use non-blocking (<=) in sequential logic.
+
+2. Non-Blocking (<=)
+
+Executes in parallel at the end of the always block.
+
+Models real flip-flop behavior.
+
+Ensures all RHS values are sampled first, then updates happen together.
+
+👉 Example (correct)
+
+always @(posedge clk) begin
+  q <= d;
+  r <= q;  // r gets old q, as expected
+end
+
+
+RTL Simulation: Matches real hardware.
+
+GLS: No mismatch.
+
+🔹 Common Caveats (Gotchas)
+🟢 Blocking (=) Caveats
+
+Good for combinational logic (always @(*)) → ensures step-by-step evaluation.
+
+Dangerous in sequential blocks (always @(posedge clk)) → can cause mismatches.
+
+Can lead to simulation race conditions if multiple always blocks depend on same signal.
+
+🔵 Non-Blocking (<=) Caveats
+
+Must be used for sequential logic (FFs).
+
+If used in combinational always blocks, can cause unexpected latches or unintended parallelism.
+
+always @(*) begin
+  y <= a & b;   // BAD: synthesizer may infer latch or strange behavior
+end
+
+
+Order of statements does not matter (all update in parallel). Sometimes makes debugging harder.
+
+🔹 Quick Rule of Thumb
+
+Combinational logic → use = (blocking).
+
+Sequential (clocked) logic → use <= (non-blocking).
+
+Never mix them in the same always block (unless you really know why).
+- **36-SKY130RTL D4SK1 L4** → Caveats with Blocking Statements
+
+🔹 Disadvantages of Blocking Assignments (=) in Sequential Logic
+
+One-Cycle Mismatch
+
+RTL sim: values propagate instantly inside same always block.
+
+Real circuit: flip-flops update only on clock edge → output lags by 1 cycle.
+
+❌ Causes wrong pipelining (data looks 1 cycle early in sim).
+
+Race Conditions
+
+If multiple always blocks use blocking assignments, execution order in sim matters.
+
+Real hardware updates in parallel → mismatch.
+
+Hard Debugging
+
+Sim shows design working fine, but on FPGA/ASIC, behavior is different → time lost in bring-up.
+
+🔹 Disadvantages of Non-Blocking Assignments (<=) in Combinational Logic
+
+Latch Inference
+
+Incomplete assignments with <= can create unintended storage elements.
+
+❌ Extra area, timing failures, higher power.
+
+Glitchy Outputs
+
+Since updates happen at end of block, combinational outputs may hold old values → wrong intermediate behavior.
+
+Loss of Ordering Control
+
+In combinational blocks, sometimes order of execution matters (e.g., priority logic).
+
+With <=, all updates happen in parallel → wrong circuit implementation.
+
+🔹 Mixing = and <= in Same Block
+
+❌ Very risky → synthesis tool may still build correct flip-flops, but simulation will show different values depending on ordering.
+
+Leads to unpredictable mismatches → hardest to debug.
 
 ### 🔹 Labs on GLS and Synthesis-Simulation Mismatch  
-- **37-SKY130RTL D4SK2 L1** → Lab: GLS Synth-Sim Mismatch (Part 1)  
-- **38-SKY130RTL D4SK2 L2** → Lab: GLS Synth-Sim Mismatch (Part 2)  
+- **37-SKY130RTL D4SK2 L1** → Lab: GLS Synth-Sim Mismatch (Part 1)
+  
+Verilog code to Understand Ternary operator working
+  
+<img width="432" height="71" alt="image" src="https://github.com/user-attachments/assets/673d99af-2956-468b-9426-fb2633680d74" />
+  
+Gatelevel netlist for ternary oprator
+
+<img width="1270" height="321" alt="image" src="https://github.com/user-attachments/assets/add87964-434a-4bd2-b5de-3e0e93056534" />
+
+- **38-SKY130RTL D4SK2 L2** → Lab: GLS Synth-Sim Mismatch (Part 2)
+  
+GLS output for Ternary mux on gtk wave
+
+<img width="1046" height="152" alt="image" src="https://github.com/user-attachments/assets/c6e491f6-f596-45d4-9690-fbfbad6d8f6f" />
+
 
 ### 🔹 Labs on Synth-Sim Mismatch for Blocking Statements  
-- **39-SKY130RTL D4SK3 L1** → Lab: Synth-Sim mismatch (Blocking, Part 1)  
-- **40-SKY130RTL D4SK3 L2** → Lab: Synth-Sim mismatch (Blocking, Part 2)  
+- **39-SKY130RTL D4SK3 L1** → Lab: Synth-Sim mismatch (Blocking, Part 1)
+  
+  Verilog code to showcase simulation mismatch and how it cna affect our design
+  
+  <img width="500" height="146" alt="image" src="https://github.com/user-attachments/assets/d4290a0e-b865-47f5-b553-e73801c1d4a6" />
+  
+Output of GTKWAVE Of above design and it shows that mux in above design working as flipflop not like mux output is not sensitive to inputs it is only depends on the  select it will change only if there is activity on select.
+
+<img width="1101" height="267" alt="image" src="https://github.com/user-attachments/assets/74f702ba-3cb6-4944-a7f1-f420b45d0b5e" />
+The snapshot shows the output is make valid using GLS simulation to remove simulation mismatch.In the figuare output is changing when inputs and sel is changing while in previous case it was depending upon sel only
+
+<img width="1122" height="162" alt="image" src="https://github.com/user-attachments/assets/89df641d-7084-488e-9b3b-4e177bce8964" />
+
+
+- **40-SKY130RTL D4SK3 L2** → Lab: Synth-Sim mismatch (Blocking, Part 2)
+  
+Verilog code to show simulation mismatch due to the blocking statements.
+
+<img width="460" height="160" alt="image" src="https://github.com/user-attachments/assets/4b84c7e5-125f-47c1-84da-00d33c44a158" />
+
+As you can see output of above verilog code on gtkwave it is not the proper output because of simulation mismatch becasue we are getting low output when input a is high it should be low that is
+due to simulation mismatch
+
+<img width="1072" height="113" alt="image" src="https://github.com/user-attachments/assets/2ebf7093-cea8-4b49-bb06-cb4a943dab5c" />
+
+These is the output of GLS on gtkwave we can see the simulation mismatches which where there in previous case are removed and we are getting high output when a input is high that we can clearly see in ouput below
+
+<img width="1096" height="202" alt="image" src="https://github.com/user-attachments/assets/abac8c43-ec57-42a7-8aba-dff0a0f35203" />
 
 ---
 
