@@ -415,21 +415,330 @@ Functionally, this particular mix realizes a 2:1 mux structure, so tracing from 
 # Day 2 - Timing libs, Hierarchical vs Flat Synthesis and Efficient Flop Coding Styles  
 
 ### 🔹 Introduction to Timing .libs  
-- **12-SKY130RTL D2SK1 L1** → Lab4: Introduction to .lib (Part 1)  
-- **13-SKY130RTL D2SK1 L2** → Lab4: Introduction to .lib (Part 2)  
-- **14-SKY130RTL D2SK1 L3** → Lab4: Introduction to .lib (Part 3)  
+- **12-SKY130RTL D2SK1 L1** → Lab4: Introduction to .lib (Part 1)
+  
+    📌 What is a .lib file?
+
+.lib = Library Exchange Format (LEF/Liberty format) file.
+
+It is an ASCII text file provided by the standard cell vendor.
+
+It describes timing, power, and functional behavior of standard cells used in ASIC/SoC design.
+
+Input to logic synthesis, timing analysis, and PnR tools.
+
+📌 What is present inside .lib?
+
+Cell Definitions
+
+Each standard cell (INV, NAND, Flip-Flop, etc.) has a block.
+
+Functional description of the cell (Boolean equation).
+
+Timing Information
+
+Delay tables (rise/fall delays, setup/hold, clk→Q, etc.).
+
+Slew-dependent and load-dependent delay data.
+
+Power Information
+
+Dynamic power (switching power).
+
+Leakage power.
+
+Internal power.
+
+Operating Conditions (PVT)
+
+Process corner (TT, SS, FF, etc.).
+
+Voltage values.
+
+Temperature values.
+
+Other info
+
+Pin capacitance.
+
+Input/output constraints.
+
+Cell area.
+
+
+📌 What Is PVT = Process, Voltage, Temperature
+1. Process
+
+Variation due to fabrication (doping, lithography, etc.).
+
+Corners: FF (fast), SS (slow), TT (typical).
+
+Effect:
+
+FF → gates are faster (low delay, more leakage).
+
+SS → gates are slower (high delay, less leakage).
+
+2. Voltage
+
+Supply voltage fluctuations.
+
+Effect:
+
+High Vdd → faster switching, more power.
+
+Low Vdd → slower switching, less power.
+
+3. Temperature
+
+Operating environment heat.
+
+Effect:
+
+High Temp → slower switching, more leakage.
+
+Low Temp → faster switching, less leakage.
+- **13-SKY130RTL D2SK1 L2** → Lab4: Introduction to .lib (Part 2)
+  
+  Snapshot Of .lib file
+
+<img width="318" height="477" alt="image" src="https://github.com/user-attachments/assets/108e978e-04c4-4324-8b02-05ff6fa01344" />
+
+<img width="747" height="412" alt="image" src="https://github.com/user-attachments/assets/efd25a85-352b-4092-a370-e5f9d4e1d9fa" />
+
+- **14-SKY130RTL D2SK1 L3** → Lab4: Introduction to .lib (Part 3)
+  
+  📌 Cells with Different Features
+
+Same logic cell (e.g., AND gate) can have different variants.
+
+Example: AND2_X1, AND2_X2, AND2_X4 …
+
+X1 → small area, low power, slow.
+
+X4 → larger area, higher power, faster.
+
+Below is the snapshot of different features for same and cell they have different area,power and many more features which vary.
+
+  <img width="1192" height="397" alt="image" src="https://github.com/user-attachments/assets/1bf5cb30-2b69-41ec-8973-d09b9d9c3bf2" />
+ 
 
 ### 🔹 Hierarchical vs Flat Synthesis  
-- **15-SKY130RTL D2SK2 L1** → Lab5: Hierarchical vs Flat (Part 1)  
-- **16-SKY130RTL D2SK2 L2** → Lab5: Hierarchical vs Flat (Part 2)  
+- **15-SKY130RTL D2SK2 L1** → Lab5: Hierarchical vs Flat (Part 1)
+  📌 Flat vs Hierarchical Synthesis
+1. Flat Synthesis
+
+Entire RTL → flattened into one big netlist.
+
+No module boundaries preserved.
+
+Pros:
+
+Better optimization (tool sees whole design).
+
+Can reduce area/delay.
+
+Cons:
+
+Very large netlist → high runtime + memory.
+
+Debugging harder (lost hierarchy).
+
+2. Hierarchical Synthesis
+
+RTL modules synthesized separately → then connected at top level.
+
+Module boundaries are preserved.
+
+Pros:
+
+Easier debug & reuse.
+
+Faster runtime, less memory.
+
+Useful for very large designs (SoCs).
+
+Cons:
+
+Less global optimization.
+
+May lead to slightly worse area/timing than flat.
+
+Verilog to code to understand the hierarchical synthesis:
+
+<img width="541" height="196" alt="image" src="https://github.com/user-attachments/assets/79b1e0f9-6a95-4dc1-ae28-39595e8c419f" />
+
+It consiste of two modules and their conncetion are shown in Netlist.There is hierarchy between modules so it is hierarchical synthesis.Synthesis is done by tool called yosys.
+
+<img width="336" height="172" alt="image" src="https://github.com/user-attachments/assets/09b6525b-1809-4434-a4af-faa86d2bcc26" />
+
+Netlist:
+
+<img width="363" height="410" alt="image" src="https://github.com/user-attachments/assets/65b3139c-7ff0-4cab-8fbb-67b83579f296" />
+
+
+
+- **16-SKY130RTL D2SK2 L2** → Lab5: Hierarchical vs Flat (Part 2)
+The Snapshot below shows difference between flat and hierarchical synthesis netlists.
+
+Left side of snapshot is hierarchical synthesis in which hierarchy is preserved as we can see different modules but in right side diagram hierarchy is not preserved so it is flat synthesis.
+
+<img width="842" height="488" alt="image" src="https://github.com/user-attachments/assets/e12a578b-d15d-41af-b893-8fb00ef149e4" />
+
+The gatelevel netlist for flat synthesis is shown below
+
+<img width="1257" height="322" alt="image" src="https://github.com/user-attachments/assets/28294ef0-f055-4ad5-bb5d-bfce41fbc29e" />
+
+📌 Why Module-Level (Hierarchical) Synthesis is Needed
+
+Scalability
+
+Big SoCs have millions of gates → flat synthesis is too heavy (runtime, memory).
+
+Breaking into modules makes synthesis manageable.
+
+Reusability
+
+Standard IPs (e.g., UART, SPI, CPU cores) are pre-synthesized and reused in multiple projects.
+
+No need to resynthesize every time.
+
+Debug & ECO (Engineering Change Order)
+
+Easier to locate and fix issues at module level.
+
+Flat netlist = one giant blob (hard to debug).
+
+Parallel Development
+
+Different teams can work on different modules simultaneously.
+
+Later integrate at top level.
+
+Runtime Efficiency
+
+Hierarchical synthesis reduces compile time drastically.
+
+Useful during iterative design flows.
 
 ### 🔹 Flop Coding Styles & Optimization  
-- **17-SKY130RTL D2SK3 L1** → Why Flops? Flop coding styles (Part 1)  
-- **18-SKY130RTL D2SK3 L2** → Flop coding styles (Part 2)  
-- **19-SKY130RTL D2SK3 L3** → Lab: Flop synthesis simulations (Part 1)  
-- **20-SKY130RTL D2SK3 L4** → Lab: Flop synthesis simulations (Part 2)  
-- **21-SKY130RTL D2SK3 L5** → Interesting optimizations (Part 1)  
+- **17-SKY130RTL D2SK3 L1** → Why Flops? Flop coding styles (Part 1)
+
+📌 What are Flops?
+
+Flop = Flip-Flop (usually D-FF in digital design).
+
+A sequential element that stores 1 bit of data.
+
+Captures input at clock edge (positive or negative).
+
+📌 Why Flops are Used (Advantages)
+
+Avoid Glitches
+
+Combinational logic can create glitches due to unequal path delays.
+
+Flops sample data only at clock edge → glitches in between are ignored.
+
+Synchronization
+
+Aligns signals with the clock → ensures stable timing.
+
+Break Long Paths
+
+Insert flops (pipelining) → reduce critical path delay, improve frequency.
+
+Data Storage
+
+Used to hold states in FSMs, registers, counters, etc.
+
+Reliable Design
+
+Makes design predictable for STA (Static Timing Analysis).
+
+- **18-SKY130RTL D2SK3 L2** → Flop coding styles (Part 2)
+
+ 📌 Asynchronous vs Synchronous Reset
+ 
+| Feature                | **Asynchronous Reset**                     | **Synchronous Reset**                    |
+| ---------------------- | ------------------------------------------ | ---------------------------------------- |
+| **When it acts**       | Immediately, **independent of clock**      | Only at **active clock edge**            |
+| **Timing**             | Can reset FF **anytime**                   | Reset happens **with clock**             |
+| **Glitch sensitivity** | May cause glitches if not handled properly | Safer from glitches                      |
+| **Design use**         | For **fast, immediate reset**              | For **predictable, clock-aligned reset** |
+| **Example in Verilog** | `always @(posedge clk or posedge rst)`     | `always @(posedge clk)` with `if (rst)`  |
+
+The snapshot shows different D-FF implementations with synchronous and asynchronous resets, written in Verilog and simulated using Iverilog
+
+<img width="572" height="431" alt="image" src="https://github.com/user-attachments/assets/f9607eae-2120-46a2-af1e-5c33a787baad" />
+
+
+
+- **19-SKY130RTL D2SK3 L3** → Lab: Flop synthesis simulations (Part 1)
+  
+  Snapshot Of command window to run the flipflop code and simulation.
+
+<img width="1238" height="328" alt="image" src="https://github.com/user-attachments/assets/dc8ae440-ef0b-4cfc-96db-b4369a4809e8" />
+
+Snapshot of how output of asynchronous dff in gtkwave.
+
+<img width="1085" height="357" alt="image" src="https://github.com/user-attachments/assets/9cad8af5-65af-4ca8-b480-c6360c8e008c" />
+
+Snapshot of how output of synchronous dff in gtkwave.
+
+<img width="618" height="217" alt="image" src="https://github.com/user-attachments/assets/8b1de7bc-f6db-4928-a6bc-5e6ca00c4e76" />
+
+- **20-SKY130RTL D2SK3 L4** → Lab: Flop synthesis simulations (Part 2)
+
+Snapshot Of commands to run synthesis
+
+<img width="867" height="352" alt="image" src="https://github.com/user-attachments/assets/738f0136-ac5f-4481-b9c1-730f1b13cc40" />
+
+
+Gate level netlist of asynchronous reset.
+
+  <img width="1152" height="346" alt="image" src="https://github.com/user-attachments/assets/636f01d8-f3ad-4b65-b93d-e647097f447d" />
+
+Gate level netlist of synchronous reset.
+
+<img width="1265" height="373" alt="image" src="https://github.com/user-attachments/assets/8c016bb8-a2df-49ff-bd15-9c1985e8d6ad" />
+
+
+  
+- **21-SKY130RTL D2SK3 L5** → Interesting optimizations (Part 1)
+  
+📌 Multiplication by 2ⁿ Optimization
+
+Observation: Multiplying a binary number by 2, 4, 8… (2ⁿ) can be done by simple left shift.
+
+Logic optimization:
+
+Instead of using a multiplier hardware, just append zeros to the LSB.
+
+Example: A * 2 → A << 1 (shift left by 1 bit)
+
+Example: A * 8 → A << 3 (shift left by 3 bits)
+
+Benefit:
+
+No complex multiplier needed.
+
+Saves area, power, and delay.
+
+So we can see clearly in snapshot that no memory cells process are requied.
+
+<img width="522" height="497" alt="image" src="https://github.com/user-attachments/assets/2da85481-aa39-4072-bb30-b7220b31dc83" />
+
+We can clearly see in netlist which is shown below there is no complex hardware these what is the benefit of the optimization.
+
+<img width="347" height="298" alt="image" src="https://github.com/user-attachments/assets/d5f2949e-7f32-4369-90d4-98949ed27ac9" />
+
+
 - **22-SKY130RTL D2SK3 L6** → Interesting optimizations (Part 2)  
+
+We can clearly see in netlist which is shown below there is no complex hardware these what is the benefit of the optimization.
+
+<img width="347" height="298" alt="image" src="https://github.com/user-attachments/assets/d5f2949e-7f32-4369-90d4-98949ed27ac9" />
 
 ---
 
