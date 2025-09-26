@@ -1265,12 +1265,190 @@ These is the output of GLS on gtkwave we can see the simulation mismatches which
 # Day 5 - Optimization in Synthesis  
 
 ### 🔹 If-Case Constructs  
-- **41-SKY130RTL D5SK1 L1** → IF-CASE Constructs (Part 1)  
-- **42-SKY130RTL D5SK1 L2** → IF-CASE Constructs (Part 2)  
-- **43-SKY130RTL D5SK1 L3** → IF-CASE Constructs (Part 3)  
+
+- **41-SKY130RTL D5SK1 L1** → IF-CASE Constructs (Part 1)
+  
+🔹 if-else Construct
+
+Used inside always blocks to describe conditional behavior.
+
+Example:
+
+always @(*) begin
+  if (sel)
+    y = a;
+  else
+    y = b;
+end
+
+
+👉 Synthesizer infers a MUX (y = sel ? a : b).
+
+🔹 Inferred Latch with if-else
+
+Latch gets inferred when not all cases assign a value to the output in a combinational block.
+
+Example (bug):
+
+always @(*) begin
+  if (en)
+    y = d;   // What if en = 0? → y not assigned
+end
+
+
+👉 Synthesis assumes you want y to hold its old value → infers a latch.
+
+Problems caused by latch:
+
+Extra area + power.
+
+Timing closure difficulties.
+
+May cause unintended storage behavior.
+
+🔹 Correct way
+
+Always cover all cases in if-else:
+
+always @(*) begin
+  if (en)
+    y = d;
+  else
+    y = 0;   // Or some default value
+end
+
+
+Or give a default assignment before condition:
+
+always @(*) begin
+  y = 0;        // default
+  if (en)
+    y = d;
+end
+- **42-SKY130RTL D5SK1 L2** → IF-CASE Constructs (Part 2)
+  🔹 Case Construct
+
+General form:
+
+always @(*) begin
+  case (sel)
+    2'b00: y = a;
+    2'b01: y = b;
+    2'b10: y = c;
+    default: y = d;
+  endcase
+end
+
+
+👉 Synthesizer infers a MUX (y = f(sel)).
+
+🔹 Caveats if default is Missing
+1. Inferred Latches
+
+If not all cases are covered and no default, then for some sel values → y not assigned → latch inferred.
+
+always @(*) begin
+  case (sel)
+    2'b00: y = a;
+    2'b01: y = b;
+    // Missing sel=2'b10, 2'b11 → y holds old value = LATCH
+  endcase
+end
+
+2. Simulation Mismatch
+
+RTL sim may leave y as X for uncovered cases,
+
+Synthesis may optimize differently (e.g., latch or don’t-care).
+👉 GLS vs RTL mismatch.
+
+3. Unintended Priority
+
+If multiple case statements without default interact, synthesis might create priority logic you didn’t want.
+
+4. Optimization Ambiguity
+
+Tools may treat missing cases as don’t-cares.
+
+Sometimes helpful for optimization, but dangerous → can cause wrong circuit if don’t-cares actually occur in real operation.
+
+🔹 Best Practices
+
+Always use default in case for combinational logic.
+
+Or initialize outputs with a default assignment before case.
+
+always @(*) begin
+  y = 0; // default
+  case (sel)
+    2'b00: y = a;
+    2'b01: y = b;
+    2'b10: y = c;
+    default: y = d;
+  endcase
+end
+
+
+For FSMs, default can safely send design to a known reset state if an invalid state occurs.
+
+- **43-SKY130RTL D5SK1 L3** → IF-CASE Constructs (Part 3)
+  🔹 Partial Assignment in case
+
+When inside a case block you assign only some signals, and leave others untouched, the untouched signals will retain their previous value.
+👉 This causes latch inference in combinational logic.
+
+⚠️ Example (Bug – Partial Assignment)
+reg [3:0] y;
+
+always @(*) begin
+  case (sel)
+    2'b00: y[0] = a;   // Only bit 0 assigned
+    2'b01: y[1] = b;   // Only bit 1 assigned
+    default: ;         // y[2] and y[3] never assigned
+  endcase
+end
+
+
+For some cases, parts of y are not assigned → synthesizer adds latches to hold their old values.
+
+✅ Correct Way (Full Assignment)
+
+Assign entire signal in every case
+
+always @(*) begin
+  case (sel)
+    2'b00: y = {3'b000, a};
+    2'b01: y = {2'b00, b, 1'b0};
+    default: y = 4'b0000;
+  endcase
+end
+
+
+Or give default assignment before case
+
+always @(*) begin
+  y = 4'b0000;   // default → no latch
+  case (sel)
+    2'b00: y[0] = a;
+    2'b01: y[1] = b;
+  endcase
+end
+
+🔹 Caveats of Partial Assignment
+
+Latch Inference → increases area, power, timing issues.
+
+Simulation vs Synthesis Mismatch → simulation may show X while synthesis infers latch.
+
+Unpredictable Hardware Behavior if unassigned bits are used later.
+
+Hard Debugging → design seems fine in sim but fails in GLS/FPGA.
+
+
 
 ### 🔹 Labs on Incomplete If-Case  
-- **44-SKY130RTL D5SK2 L1** → Lab: Incomplete IF (Part 1)  
+- **44-SKY130RTL D5SK2 L1** → Lab: Incomplete IF (Part 1)
+  
 - **45-SKY130RTL D5SK2 L2** → Lab: Incomplete IF (Part 2)  
 
 ### 🔹 Labs on Incomplete Overlapping Case  
